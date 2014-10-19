@@ -15,6 +15,7 @@ clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 
 install:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules_install
 
 info:
 	modinfo  ${module_upload}
