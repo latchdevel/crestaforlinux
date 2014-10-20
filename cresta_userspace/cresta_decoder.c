@@ -1,3 +1,6 @@
+/*
+ * License: GPLv3. See license.txt
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

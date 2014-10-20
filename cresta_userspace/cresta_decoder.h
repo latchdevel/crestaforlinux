@@ -1,3 +1,6 @@
+/*
+ * License: GPLv3. See license.txt
+ */
 #ifndef _CRESTA_DECODER_H_
 #define _CRESTA_DECODER_H_
 

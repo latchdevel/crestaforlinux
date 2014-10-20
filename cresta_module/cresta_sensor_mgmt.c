@@ -1,3 +1,18 @@
+/*
+ * Module for receiving and decoding of wireless weather station
+ * sensor data (433MHz). Protocol used by Cresta/Irox/Mebus/Nexus/
+ * Honeywell/Hideki/TFA weather stations.
+ * 
+ * Protocol was reverse engineered by Ruud v Gessel
+,* and documented in "Cresta weather sensor protocol", see
+ * http://members.upc.nl/m.beukelaar/Crestaprotocol.pdf
+ *
+ * This module utilizes code of the Arduino
+ * decoder library "433MHzForArduino" for decoding the sensor data,
+ * see https://bitbucket.org/fuzzillogic/433mhzforarduino
+ *
+ * License: GPLv3. See license.txt
+ */
 
 #include <linux/kfifo.h>
 #include <linux/mutex.h>
