@@ -1,6 +1,3 @@
-/*
- * License: GPLv3. See license.txt
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -379,22 +376,22 @@ uint16_t get_rain_tick_count(uint8_t* decrypted_data) {
     return rain_ticks;
 }
 
-int get_battery_low_status(uint8_t* decrypted_data) {
+int get_battery_status(uint8_t* decrypted_data) {
   //according to cresta PDF:
   //
   //bits 7+6 of byte[2] (length) encode battery status
   //Battery OK: both 1
   //Battery < 2.5V: both 0
-  int is_low = 0;
+  int is_good = 0;
   
   uint8_t status = (decrypted_data[2] >> 6) & 0x03;
   if(status == 0x03) {
-    is_low = 0;
+    is_good = 1;
   } else {
-    is_low = 1;
+    is_good = 0;
   }
   
-  return is_low;
+  return is_good;
 }
   
 
@@ -409,10 +406,10 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 	printf("\tWind speed = %.02f km/h\n", get_anemometer_windspeed(data->measurement.decrypted_data));
 	printf("\tWind gust = %.02f km/h\n", get_anemometer_windgust(data->measurement.decrypted_data));
 	printf("\tWind direction = %.01f °\n", get_anemometer_wind_direction(data->measurement.decrypted_data));
-	if(get_battery_low_status(data->measurement.decrypted_data)) {
-	  printf("\tBattery = LOW\n");
-	} else {
+	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
+	} else {
+	  printf("\tBattery = LOW\n");
 	}
 	break;
       }
@@ -423,10 +420,10 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 	printf("\tUV med/h = %.01f\n", get_uv_medh(data->measurement.decrypted_data));
 	printf("\tUV index = %.01f\n", get_uv_uvindex(data->measurement.decrypted_data));
 	printf("\tUV level = %d\n", get_uv_uvlevel(data->measurement.decrypted_data));
-	if(get_battery_low_status(data->measurement.decrypted_data)) {
-	  printf("\tBattery = LOW\n");
-	} else {
+	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
+	} else {
+	  printf("\tBattery = LOW\n");
 	}
 	break;
       }
@@ -434,10 +431,10 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 	printf("Rain sensor data:\n");
 	printf("\tTime = %s",  ctime((time_t*)&data->measurement.measurement_time_seconds));
 	printf("\train ticks = %d\n", get_rain_tick_count(data->measurement.decrypted_data));
-	if(get_battery_low_status(data->measurement.decrypted_data)) {
-	  printf("\tBattery = LOW\n");
-	} else {
+	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
+	} else {
+	  printf("\tBattery = LOW\n");
 	}
 	break;
       }
@@ -446,10 +443,10 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 	printf("\tTime = %s",  ctime((time_t*)&data->measurement.measurement_time_seconds));
 	printf("\tTemperature = %.01f °C\n", get_thermohygro_temperature(data->measurement.decrypted_data));
 	printf("\tHumidity = %d %%\n", get_thermohygro_humidity(data->measurement.decrypted_data));
-	if(get_battery_low_status(data->measurement.decrypted_data)) {
-	  printf("\tBattery = LOW\n");
-	} else {
+	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
+	} else {
+	  printf("\tBattery = LOW\n");
 	}
 	break;
       }
@@ -462,31 +459,35 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 void print_measurement_data_short(struct cresta_measurement_data* data) {
     switch(data->sensor_type) {
       case(CRESTA_SENSOR_TYPE_ANEMOMETER): {
-	printf("%lu:%.01f:%.01f:%.02f:%.02f:%.01f\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.01f:%.01f:%.02f:%.02f:%.01f:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                                        , get_anemometer_temperature(data->measurement.decrypted_data)
 	                                        , get_anemometer_windchill(data->measurement.decrypted_data)
 						, get_anemometer_windspeed(data->measurement.decrypted_data)
 						, get_anemometer_windgust(data->measurement.decrypted_data)
-						, get_anemometer_wind_direction(data->measurement.decrypted_data));
+						, get_anemometer_wind_direction(data->measurement.decrypted_data)
+						, get_battery_status(data->measurement.decrypted_data));
 	break;
       }
       case(CRESTA_SENSOR_TYPE_UV): {
-	printf("%lu:%.01f:%.01f:%.01f:%d\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.01f:%.01f:%.01f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                               , get_uv_absolute_temperature(data->measurement.decrypted_data)
 				       , get_uv_medh(data->measurement.decrypted_data)
 				       , get_uv_uvindex(data->measurement.decrypted_data)
-				       , get_uv_uvlevel(data->measurement.decrypted_data));
+				       , get_uv_uvlevel(data->measurement.decrypted_data)
+				       , get_battery_status(data->measurement.decrypted_data));
 	break;
       }
       case(CRESTA_SENSOR_TYPE_RAIN): {
-	printf("%lu:%d\n", (unsigned long) data->measurement.measurement_time_seconds
-	                 , get_rain_tick_count(data->measurement.decrypted_data));
+	printf("%lu:%d:%d\n", (unsigned long) data->measurement.measurement_time_seconds
+	                 , get_rain_tick_count(data->measurement.decrypted_data)
+			 , get_battery_status(data->measurement.decrypted_data));
 	break;
       }
       case(CRESTA_SENSOR_TYPE_THERMOHYGRO): {
-	printf("%lu:%.01f:%d\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.01f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                      , get_thermohygro_temperature(data->measurement.decrypted_data)
-			      , get_thermohygro_humidity(data->measurement.decrypted_data));
+			      , get_thermohygro_humidity(data->measurement.decrypted_data)
+			      , get_battery_status(data->measurement.decrypted_data));
 	break;
       }
     }
