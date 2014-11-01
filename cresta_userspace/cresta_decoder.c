@@ -144,7 +144,7 @@ uint8_t get_sensor_type_from_decrypted_data(uint8_t* decrypted_data) {
  * Offset is index of lowest byte containing temperature data.
  */
 float get_temperature_from_cresta_encoding(uint8_t* decrypted_data, uint8_t offset) {
-      float temperature = 0;
+      float temperature = 0.0;
 
       /**
        * according to cresta.pdf temperature bcd encoded
@@ -158,11 +158,10 @@ float get_temperature_from_cresta_encoding(uint8_t* decrypted_data, uint8_t offs
        *            = 0x0C -> positive
        */ 
       
-      temperature += ((decrypted_data[offset+1] & 0x0F) * 10);
+      temperature += (decrypted_data[offset+1] & 0x0F) * 10.0;
       temperature += (decrypted_data[offset] >> 4);
-      temperature += ((decrypted_data[offset] & 0x0F) / 10);
-      
-      
+      temperature += (decrypted_data[offset] & 0x0F) / 10.0;
+
       //check whether temperature is positive or negative
       if((decrypted_data[offset+1] >> 4) == 0x04) {
 	//temperature is negative
@@ -222,7 +221,7 @@ float get_anemometer_windchill(uint8_t* decrypted_data) {
 }
 
 float get_anemometer_windspeed(uint8_t* decrypted_data) {
-    float windspeed = 0;
+    float windspeed = 0.0;
     
     /*
      * Windspeed: BCD encoded, miles per hour
@@ -231,9 +230,9 @@ float get_anemometer_windspeed(uint8_t* decrypted_data) {
      * 3rd digit: byte[8], lower nibble
      */
     
-	windspeed += (decrypted_data[9] & 0x0F) * 10;
+	windspeed += (decrypted_data[9] & 0x0F) * 10.0;
 	windspeed += (decrypted_data[8] >> 4);
-	windspeed += (decrypted_data[8] & 0x0F) / 10;
+	windspeed += (decrypted_data[8] & 0x0F) / 10.0;
 	
     if(METRIC_UNITS) {
       windspeed *= 1.60934; 
@@ -243,7 +242,7 @@ float get_anemometer_windspeed(uint8_t* decrypted_data) {
 }
 
 float get_anemometer_windgust(uint8_t* decrypted_data) {
-    float windgust = 0;
+    float windgust = 0.0;
     
     /*
      * Windgust: BCD encoded, mph
@@ -251,9 +250,9 @@ float get_anemometer_windgust(uint8_t* decrypted_data) {
      * 2nd digit: byte[10], lower nibble
      * 3rd digit: byte[9], upper nibble
      */
-      windgust += (decrypted_data[10] >> 4) * 10;
+      windgust += (decrypted_data[10] >> 4) * 10.0;
       windgust += (decrypted_data[10] & 0x0F);
-      windgust += (decrypted_data[9] >> 4) / 10;
+      windgust += (decrypted_data[9] >> 4) / 10.0;
       
     if(METRIC_UNITS) {
       windgust *= 1.60934; 
@@ -291,12 +290,10 @@ float get_uv_absolute_temperature(uint8_t* decrypted_data) {
    * 3rd digit: byte[4], low nibble
    */
    
-  float temperature = 0;
-  
-  temperature += (decrypted_data[5] & 0x0F) * 10;
+  float temperature = 0.0;
+  temperature += (decrypted_data[5] & 0x0F) * 10.0;
   temperature += (decrypted_data[4] >> 4);
-  temperature += (decrypted_data[4] & 0x0F) / 10;
-
+  temperature += (decrypted_data[4] & 0x0F) / 10.0;
   return temperature;
 }
 
@@ -312,11 +309,11 @@ float get_uv_medh(uint8_t* decrypted_data) {
    * 3rd digit: byte[5], high nibble
    */ 
 
-  float medh = 0;
+  float medh = 0.0;
   
-  medh += (decrypted_data[6] >> 4) * 10;
+  medh += (decrypted_data[6] >> 4) * 10.0;
   medh += (decrypted_data[6] & 0x0F);
-  medh += (decrypted_data[5] >> 4) / 10;
+  medh += (decrypted_data[5] >> 4) / 10.0;
 
   return medh;
   
@@ -333,10 +330,10 @@ float get_uv_uvindex(uint8_t* decrypted_data) {
    * 3rd digit: byte[7], low nibble
    */
   
-  float uv_index = 0;
-  uv_index += (decrypted_data[8] & 0x0F) * 10;
+  float uv_index = 0.0;
+  uv_index += (decrypted_data[8] & 0x0F) * 10.0;
   uv_index += (decrypted_data[7] >> 4);
-  uv_index += (decrypted_data[7] & 0x0F) / 10;
+  uv_index += (decrypted_data[7] & 0x0F) / 10.0;
 
   return uv_index;
 }
@@ -401,11 +398,11 @@ void print_measurement_data(struct cresta_measurement_data* data) {
       case(CRESTA_SENSOR_TYPE_ANEMOMETER): {
 	printf("Anenometer sensor data:\n");
 	printf("\tTime = %s",  ctime((time_t*)&data->measurement.measurement_time_seconds));
-	printf("\tTemperature = %.01f °C\n", get_anemometer_temperature(data->measurement.decrypted_data));
-	printf("\tWind chill = %.01f °C\n", get_anemometer_windchill(data->measurement.decrypted_data));
-	printf("\tWind speed = %.02f km/h\n", get_anemometer_windspeed(data->measurement.decrypted_data));
-	printf("\tWind gust = %.02f km/h\n", get_anemometer_windgust(data->measurement.decrypted_data));
-	printf("\tWind direction = %.01f °\n", get_anemometer_wind_direction(data->measurement.decrypted_data));
+	printf("\tTemperature = %.1f °C\n", get_anemometer_temperature(data->measurement.decrypted_data));
+	printf("\tWind chill = %.1f °C\n", get_anemometer_windchill(data->measurement.decrypted_data));
+	printf("\tWind speed = %.2f km/h\n", get_anemometer_windspeed(data->measurement.decrypted_data));
+	printf("\tWind gust = %.2f km/h\n", get_anemometer_windgust(data->measurement.decrypted_data));
+	printf("\tWind direction = %.1f °\n", get_anemometer_wind_direction(data->measurement.decrypted_data));
 	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
 	} else {
@@ -416,9 +413,9 @@ void print_measurement_data(struct cresta_measurement_data* data) {
       case(CRESTA_SENSOR_TYPE_UV): {
 	printf("UV sensor data:\n");
 	printf("\tTime = %s",  ctime((time_t*)&data->measurement.measurement_time_seconds));
-	printf("\tAbsolute temperature = %.01f °C\n", get_uv_absolute_temperature(data->measurement.decrypted_data));
-	printf("\tUV med/h = %.01f\n", get_uv_medh(data->measurement.decrypted_data));
-	printf("\tUV index = %.01f\n", get_uv_uvindex(data->measurement.decrypted_data));
+	printf("\tAbsolute temperature = %.1f °C\n", get_uv_absolute_temperature(data->measurement.decrypted_data));
+	printf("\tUV med/h = %.1f\n", get_uv_medh(data->measurement.decrypted_data));
+	printf("\tUV index = %.1f\n", get_uv_uvindex(data->measurement.decrypted_data));
 	printf("\tUV level = %d\n", get_uv_uvlevel(data->measurement.decrypted_data));
 	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
@@ -441,7 +438,7 @@ void print_measurement_data(struct cresta_measurement_data* data) {
       case(CRESTA_SENSOR_TYPE_THERMOHYGRO): {
 	printf("ThermoHygro sensor data:\n");
 	printf("\tTime = %s",  ctime((time_t*)&data->measurement.measurement_time_seconds));
-	printf("\tTemperature = %.01f °C\n", get_thermohygro_temperature(data->measurement.decrypted_data));
+	printf("\tTemperature = %.1f °C\n", get_thermohygro_temperature(data->measurement.decrypted_data));
 	printf("\tHumidity = %d %%\n", get_thermohygro_humidity(data->measurement.decrypted_data));
 	if(get_battery_status(data->measurement.decrypted_data)) {
 	  printf("\tBattery = OK\n");
@@ -459,7 +456,7 @@ void print_measurement_data(struct cresta_measurement_data* data) {
 void print_measurement_data_short(struct cresta_measurement_data* data) {
     switch(data->sensor_type) {
       case(CRESTA_SENSOR_TYPE_ANEMOMETER): {
-	printf("%lu:%.01f:%.01f:%.02f:%.02f:%.01f:%d\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.1f:%.1f:%.2f:%.2f:%.1f:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                                        , get_anemometer_temperature(data->measurement.decrypted_data)
 	                                        , get_anemometer_windchill(data->measurement.decrypted_data)
 						, get_anemometer_windspeed(data->measurement.decrypted_data)
@@ -469,7 +466,7 @@ void print_measurement_data_short(struct cresta_measurement_data* data) {
 	break;
       }
       case(CRESTA_SENSOR_TYPE_UV): {
-	printf("%lu:%.01f:%.01f:%.01f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.1f:%.1f:%.1f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                               , get_uv_absolute_temperature(data->measurement.decrypted_data)
 				       , get_uv_medh(data->measurement.decrypted_data)
 				       , get_uv_uvindex(data->measurement.decrypted_data)
@@ -484,7 +481,7 @@ void print_measurement_data_short(struct cresta_measurement_data* data) {
 	break;
       }
       case(CRESTA_SENSOR_TYPE_THERMOHYGRO): {
-	printf("%lu:%.01f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
+	printf("%lu:%.1f:%d:%d\n",(unsigned long) data->measurement.measurement_time_seconds
 	                      , get_thermohygro_temperature(data->measurement.decrypted_data)
 			      , get_thermohygro_humidity(data->measurement.decrypted_data)
 			      , get_battery_status(data->measurement.decrypted_data));
